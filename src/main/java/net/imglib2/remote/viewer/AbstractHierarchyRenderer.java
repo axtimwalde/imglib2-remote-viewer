@@ -36,6 +36,11 @@ import net.imglib2.ui.util.GuiUtil;
  */
 abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet & Concatenable< AffineGet > > extends AbstractRenderer< A >
 {
+	static public enum Interpolation
+	{
+		NEAREST_NEIGHBOR, N_LINEAR
+	}
+	
 	final protected ARGBScreenImage[] screenImages;
 	
 	final protected BufferedImage[] bufferedImages;
@@ -45,6 +50,8 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 	final protected int numRenderingThreads;
 	
 	protected InterruptibleProjector projector = null;
+	
+	protected Interpolation interpolation = Interpolation.NEAREST_NEIGHBOR;
 	
 	
 	/**
@@ -60,7 +67,7 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 		if (
 				screenImages[ 0 ] == null || screenImages[ 0 ].dimension( 0 ) != componentW || screenImages[ 0 ].dimension( 1 ) != componentH )
 		{
-			System.out.println( "resizing" );
+//			System.out.println( "resizing" );
 			for ( int b = 0; b < screenImages.length; ++b )
 			{
 				screenImages[ b ] = new ARGBScreenImage( componentW, componentH );
@@ -85,7 +92,17 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 		bufferedImages = new BufferedImage[ nImages ];
 	}
 	
-	abstract protected InterruptibleProjector createProjector( final A viewerTransform, final ARGBScreenImage screenImage );
+	abstract protected VolatileHierarchyProjector< ?, ?, ? > createProjector(
+			final A viewerTransform,
+			final ARGBScreenImage screenImage );
+	
+	public void toggleInterpolation()
+	{
+		if ( interpolation == Interpolation.NEAREST_NEIGHBOR )
+			interpolation = Interpolation.N_LINEAR;
+		else
+			interpolation = Interpolation.NEAREST_NEIGHBOR;
+	}
 	
 	@Override
 	public boolean paint( final A viewerTransform )
@@ -93,8 +110,6 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 		if ( !checkResize() )
 			return false;
 		
-		System.out.println( "painting" );
-
 		// the corresponding ARGBScreenImage (to render to)
 		final ARGBScreenImage screenImage;
 
@@ -102,7 +117,7 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 		final BufferedImage bufferedImage;
 
 		// the projector that paints to the screenImage.
-		final InterruptibleProjector p;
+		final VolatileHierarchyProjector< ?, ?, ? > p;
 
 		synchronized( this )
 		{
@@ -111,10 +126,10 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 			p = createProjector( viewerTransform, screenImage );
 			projector = p;
 		}
-
+		
 		// try rendering
 		final boolean success = p.map();
-		
+			
 		synchronized ( this )
 		{
 			// if rendering was not cancelled...
@@ -131,6 +146,9 @@ abstract public class AbstractHierarchyRenderer< A extends AffineSet & AffineGet
 				}
 			}
 		}
+		
+		if ( success && !p.isValid() )
+			requestRepaint();
 
 		return success;
 	}

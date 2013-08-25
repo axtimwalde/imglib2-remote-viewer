@@ -89,16 +89,7 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 		height = target.dimension( 1 );
 		cr = -width;
 		
-		clearMask();
-	}
-	
-	public void setSources( final List< RandomAccessible< A > > sources )
-	{
-		synchronized ( this.sources )
-		{
-			this.sources.addAll( sources );
-			s = sources.size();
-		}
+		clear();
 	}
 	
 	/**
@@ -187,7 +178,8 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 								converter.convert( a, targetRandomAccess.get() );
 								m.set( i );
 							}
-							valid &= v;
+							else
+								valid = false;
 						}
 						sourceRandomAccess.fwd( 0 );
 						targetRandomAccess.fwd( 0 );
@@ -203,7 +195,7 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 			}
 			if ( valid )
 				s = i - 1;
-			valid = s == 1;
+			valid = s == 0;
 		}
 		return true;
 	}

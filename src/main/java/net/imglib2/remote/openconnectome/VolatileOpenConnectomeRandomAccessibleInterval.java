@@ -77,7 +77,7 @@ public class VolatileOpenConnectomeRandomAccessibleInterval extends
 		{
 			while ( !isInterrupted() )
 			{
-				System.out.println( "Queue size: " + queue.size() );
+//				System.out.println( "Queue size: " + queue.size() );
 				Reference< Entry > ref;
 				synchronized ( cache )
 				{
@@ -136,7 +136,7 @@ public class VolatileOpenConnectomeRandomAccessibleInterval extends
 						
 						try
 						{
-							System.out.println( url.toString() );
+//							System.out.println( url.toString() );
 							final URL file = new URL( url.toString() );
 							final InputStream in = file.openStream();
 							final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();

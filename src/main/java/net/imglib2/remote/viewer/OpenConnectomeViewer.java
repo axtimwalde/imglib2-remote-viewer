@@ -39,7 +39,6 @@ package net.imglib2.remote.viewer;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.display.VolatileRealType;
-import net.imglib2.display.VolatileRealTypeARGBConverter;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.ui.AffineTransformType3D;
@@ -82,20 +81,19 @@ public class OpenConnectomeViewer
 //			{ 64, 64, 64 } };
 	
 	final static protected int[][] levelCellDimensions = new int[][]{
-		{ 128, 128, 1 },
-		{ 128, 128, 1 },
-		{ 128, 128, 1 },
-		{ 128, 128, 1 },
-		{ 128, 128, 1 },
-		{ 128, 128, 1 },
-		{ 128, 128, 1 },
-		{ 128, 128, 1 } };
+		{ 64, 64, 8 },
+		{ 64, 64, 8 },
+		{ 64, 64, 8 },
+		{ 64, 64, 8 },
+		{ 64, 64, 8 },
+		{ 64, 64, 8 },
+		{ 64, 64, 8 },
+		{ 64, 64, 8 } };
 	
 	final static public void main( final String[] args )
 	{
 		final int w = 800, h = 450;
 
-		final double s = w / 4;
 		final AffineTransform3D initial = new AffineTransform3D();
 		initial.set(
 			1.0, 0.0, 0.0, -levelDimensions[ 0 ][ 0 ] * levelScales[ 0 ][ 0 ] / 2.0,
@@ -107,20 +105,25 @@ public class OpenConnectomeViewer
 				( long )Math.round( levelDimensions[ 0 ][ 1 ] * levelScales[ 0 ][ 1 ] ),
 				( long )Math.round( levelDimensions[ 0 ][ 2 ] * levelScales[ 0 ][ 2 ] ) );
 		
-		/* Renderer */
+		/* interactive canvas */
+		final InteractiveDisplayCanvasComponent< AffineTransform3D > canvas =
+				new InteractiveDisplayCanvasComponent< AffineTransform3D >( w, h, TransformEventHandler3D.factory() );
+		
+		/* renderer */
 		final OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
 				new OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D >(
 						new AffineTransformType3D(),
+						canvas,
 						"http://openconnecto.me/emca/kasthuri11",
 						levelDimensions,
 						levelScales,
-						levelCellDimensions );
+						levelCellDimensions,
+						initial );
 		
-		final VolatileRealTypeARGBConverter converter = new VolatileRealTypeARGBConverter( 0, 255 );
 		final InteractiveRealViewer< VolatileRealType< UnsignedByteType >, AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > > viewer =
 				new InteractiveRealViewer< VolatileRealType< UnsignedByteType >, AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > >(
 						AffineTransformType3D.instance,
-						new InteractiveDisplayCanvasComponent< AffineTransform3D >( w, h, TransformEventHandler3D.factory() ),
+						canvas,
 						rendererFactory );
 
 		final BoxOverlayRenderer box = new BoxOverlayRenderer( w, h );

@@ -21,6 +21,9 @@ import ij.process.ColorProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
@@ -40,6 +43,7 @@ import net.imglib2.img.basictypeaccess.array.IntArray;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.ui.AbstractInterruptibleProjector;
+import net.imglib2.ui.util.StopWatch;
 import net.imglib2.view.Views;
 
 /**
@@ -58,9 +62,9 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 	
 	final protected FinalInterval sourceInterval;
 
-	final long width;
-	final long height;
-	final long cr;
+	final int width;
+	final int height;
+	final int cr;
 	
 	final IterableInterval< B > iterableTarget;
 	
@@ -85,8 +89,8 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 		max[ 1 ] = target.max( 1 );
 		sourceInterval = new FinalInterval( min, max );
 
-		width = target.dimension( 0 );
-		height = target.dimension( 1 );
+		width = ( int )target.dimension( 0 );
+		height = ( int )target.dimension( 1 );
 		cr = -width;
 		
 		clear();
@@ -142,62 +146,113 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 	@Override
 	public boolean map()
 	{
-		System.out.println( "Mapping " + s + " levels." );
+		interrupted.set( false );
+
+		final StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
 		
-		final RandomAccess< B > targetRandomAccess = target.randomAccess( target );
-		final ArrayRandomAccess< IntType > maskRandomAccess = mask.randomAccess( target );
+		final int numTasks;
+		if ( numThreads > 1 )
+		{
+			numTasks = Math.max( numThreads * 10, height );
+		}
+		else
+			numTasks = 1;
+		final double taskHeight = ( double )height / numTasks;
 		
 		int i;
 		
 		valid = false;
 		
-		synchronized ( this.sources )
+		for ( i = 0; i < s && !valid; ++i )
 		{
-			for ( i = 0; i < s && !valid; ++i )
-			{
-				valid = true;
-				
-				final RandomAccess< A > sourceRandomAccess = sources.get( i ).randomAccess( sourceInterval );
-				sourceRandomAccess.setPosition( min );
-				targetRandomAccess.setPosition( min[ 0 ], 0 );
-				targetRandomAccess.setPosition( min[ 1 ], 1 );
-				maskRandomAccess.setPosition( min[ 0 ], 0 );
-				maskRandomAccess.setPosition( min[ 1 ], 1 );
+			final int iFinal = i;
 			
-				for ( long y = 0; y < height; ++y )
+			valid = true;
+			
+			final ExecutorService ex = Executors.newFixedThreadPool( numThreads );
+			
+			for ( int taskNum = 0; taskNum < numTasks; ++taskNum )
+			{
+				final long myMinY = min[ 1 ] + ( int ) ( taskNum * taskHeight );
+				final long myHeight = ( (taskNum == numTasks - 1 ) ? height : ( int ) ( ( taskNum + 1 ) * taskHeight ) ) - myMinY - min[ 1 ];
+
+				final Runnable r = new Runnable()
 				{
-					for ( long x = 0; x < width; ++x )
+					@Override
+					public void run()
 					{
-						final IntType m = maskRandomAccess.get();
-						if ( m.get() > i )
+						if ( interrupted.get() )
+							return;
+
+						final RandomAccess< B > targetRandomAccess = target.randomAccess( target );
+						final ArrayRandomAccess< IntType > maskRandomAccess = mask.randomAccess( target );
+						final RandomAccess< A > sourceRandomAccess = sources.get( iFinal ).randomAccess( sourceInterval );
+						
+						sourceRandomAccess.setPosition( min );
+						sourceRandomAccess.setPosition( myMinY, 1 );
+						
+						targetRandomAccess.setPosition( min[ 0 ], 0 );
+						targetRandomAccess.setPosition( myMinY, 1 );
+						
+						maskRandomAccess.setPosition( min[ 0 ], 0 );
+						maskRandomAccess.setPosition( myMinY, 1 );
+		
+						for ( long y = 0; y < myHeight; ++y )
 						{
-							final A a = sourceRandomAccess.get();
-							final boolean v = a.isValid();
-							if ( v )
+							if ( interrupted.get() )
+								return;
+							
+							for ( long x = 0; x < width; ++x )
 							{
-								converter.convert( a, targetRandomAccess.get() );
-								m.set( i );
+								final IntType m = maskRandomAccess.get();
+								if ( m.get() > iFinal )
+								{
+									final A a = sourceRandomAccess.get();
+									final boolean v = a.isValid();
+									if ( v )
+									{
+										converter.convert( a, targetRandomAccess.get() );
+										m.set( iFinal );
+									}
+									else
+										valid = false;
+								}
+								sourceRandomAccess.fwd( 0 );
+								targetRandomAccess.fwd( 0 );
+								maskRandomAccess.fwd( 0 );
 							}
-							else
-								valid = false;
+							sourceRandomAccess.move( cr, 0 );
+							targetRandomAccess.move( cr, 0 );
+							maskRandomAccess.move( cr, 0 );
+							sourceRandomAccess.fwd( 1 );
+							targetRandomAccess.fwd( 1 );
+							maskRandomAccess.fwd( 1 );
 						}
-						sourceRandomAccess.fwd( 0 );
-						targetRandomAccess.fwd( 0 );
-						maskRandomAccess.fwd( 0 );
 					}
-					sourceRandomAccess.move( cr, 0 );
-					targetRandomAccess.move( cr, 0 );
-					maskRandomAccess.move( cr, 0 );
-					sourceRandomAccess.fwd( 1 );
-					targetRandomAccess.fwd( 1 );
-					maskRandomAccess.fwd( 1 );
-				}
+				};
+				ex.execute( r );
 			}
-			if ( valid )
-				s = i - 1;
-			valid = s == 0;
+			ex.shutdown();
+			try
+			{
+				ex.awaitTermination( 1, TimeUnit.HOURS );
+			}
+			catch ( final InterruptedException e )
+			{
+				e.printStackTrace();
+			}
 		}
-		return true;
+		
+		lastFrameRenderNanoTime = stopWatch.nanoTime();
+		
+		if ( valid )
+			s = i - 1;
+		valid = s == 0;
+		
+		System.out.println( "Mapping complete after " + ( s + 1 ) + " levels." );
+		
+		return !interrupted.get();
 	}
 	
 	

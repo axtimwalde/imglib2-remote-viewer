@@ -101,7 +101,7 @@ public class OpenConnectomeHierarchyRenderer< A extends AffineSet & AffineGet & 
 						1, level );
 				
 				final ExtendedRandomAccessibleInterval< VolatileRealType< UnsignedByteType >, ? > extendedSource =
-						Views.extendValue( source, new VolatileRealType< UnsignedByteType >( new UnsignedByteType( 127 ) ) );
+						Views.extendValue( source, new VolatileRealType< UnsignedByteType >( new UnsignedByteType( 127 ), true ) );
 				sources.add( extendedSource );
 				
 				final B sourceToScreen = transformType.createTransform();

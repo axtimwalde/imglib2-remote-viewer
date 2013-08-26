@@ -46,6 +46,7 @@ import net.imglib2.ui.InteractiveDisplayCanvasComponent;
 import net.imglib2.ui.TransformEventHandler3D;
 import net.imglib2.ui.overlay.BoxOverlayRenderer;
 import net.imglib2.ui.overlay.LogoPainter;
+import net.imglib2.ui.util.Defaults;
 import net.imglib2.ui.viewer.InteractiveRealViewer;
 
 public class OpenConnectomeViewer
@@ -115,15 +116,30 @@ public class OpenConnectomeViewer
 				new InteractiveDisplayCanvasComponent< AffineTransform3D >( w, h, TransformEventHandler3D.factory() );
 		
 		/* renderer */
-		final OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
-				new OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D >(
+//		final OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
+//				new OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D >(
+//						new AffineTransformType3D(),
+//						canvas,
+//						"http://openconnecto.me/emca/kasthuri11",
+//						levelDimensions,
+//						levelScales,
+//						levelCellDimensions,
+//						initial );
+		final OpenConnectomeMultiResolutionHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
+				new OpenConnectomeMultiResolutionHierarchyRenderer.Factory< AffineTransform3D >(
 						new AffineTransformType3D(),
 						canvas,
 						"http://openconnecto.me/emca/kasthuri11",
 						levelDimensions,
 						levelScales,
 						levelCellDimensions,
-						initial );
+						initial,
+//						new double[]{ 1, 0.5, 0.25, 0.125, 0.0625, 0.03125 },
+						Defaults.screenScales,
+						Defaults.targetRenderNanos,
+						Defaults.doubleBuffered,
+						Defaults.numRenderingThreads );
+		
 		
 		final InteractiveRealViewer< VolatileRealType< UnsignedByteType >, AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > > viewer =
 				new InteractiveRealViewer< VolatileRealType< UnsignedByteType >, AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > >(

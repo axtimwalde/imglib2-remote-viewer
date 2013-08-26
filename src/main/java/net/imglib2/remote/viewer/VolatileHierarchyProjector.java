@@ -49,7 +49,7 @@ import net.imglib2.view.Views;
 /**
  * {@link Projector} for a hierarchy of {@link Volatile} inputs.  After each
  * {@link #map()} call, the projector has a {@link #isValid() state} that
- * signalizes whether all projected pixels were valid.
+ * signalizes whether all projected pixels were perfect.
  *
  * @author Stephan Saalfeld <saalfeld@mpi-cbg.de>
  */

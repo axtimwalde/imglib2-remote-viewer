@@ -37,7 +37,6 @@
 
 package net.imglib2.remote.catmaid;
 
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.process.ColorProcessor;
 
@@ -58,8 +57,9 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.TypeIdentity;
 import net.imglib2.display.ARGBScreenImage;
-import net.imglib2.display.XYProjector;
+import net.imglib2.display.XYRandomAccessibleProjector;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.view.Views;
 
 /**
  * A read-only {@link RandomAccessibleInterval} of ARGBTypes that generates its
@@ -684,21 +684,75 @@ public class CATMAIDRandomAccessibleInterval extends AbstractInterval implements
 		}
 	}
 	
-	final static public void main( final String[] args )
+	/**
+	 * Test by displaying.
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	final public void draw( final int width, final int height )
 	{
-		new ImageJ();
+		final ARGBScreenImage target = new ARGBScreenImage( width, height );
+		final XYRandomAccessibleProjector< ARGBType, ARGBType > projector =
+				new XYRandomAccessibleProjector< ARGBType, ARGBType >(
+						Views.offset( this, this.dimension( 0 ) / 2, this.dimension( 1 ) / 2, this.dimension( 2 ) / 2 ),
+						target,
+						new TypeIdentity< ARGBType >() );
 		
-		final CATMAIDRandomAccessibleInterval map = new CATMAIDRandomAccessibleInterval(
-				"http://catmaid.mpi-cbg.de/map/c-elegans/",
-				6016,
-				4464,
-				803,
-				0,
-				256,
-				256 );
-		final ARGBScreenImage screenImage = new ARGBScreenImage( 1024, 1024 );
-		final XYProjector< ARGBType, ARGBType > projector = new XYProjector< ARGBType, ARGBType >( map, screenImage, new TypeIdentity< ARGBType >() );
+		final ImagePlus imp = new ImagePlus( "test", new ColorProcessor( ( int )target.dimension( 0 ), ( int )target.dimension( 1 ) ) );
+		imp.show();
+		
+		long t = 0;
+
+		t = System.currentTimeMillis();
 		projector.map();
-		new ImagePlus( "map", new ColorProcessor( screenImage.image() ) ).show();
+		System.out.println( " s = " + s + " took " + ( System.currentTimeMillis() - t ) + "ms" );
+			
+		imp.setImage( ( ( ARGBScreenImage )target ).image() );
 	}
+	
+	final static public void main( final String... args )
+	{
+		final long width = 1987;
+		final long height = 1441;
+		final long depth = 460;
+		
+		final double resXY = 5.6;
+		final double resZ = 11.2;
+		
+		final String baseUrl = "file:/home/saalfeld/tmp/catmaid/export-test/fib/aligned/xy/";
+		
+		final int tileWidth = 256;
+		final int tileHeight = 256;
+		
+		final CATMAIDRandomAccessibleInterval source =
+				new CATMAIDRandomAccessibleInterval(
+						baseUrl,
+						width,
+						height,
+						depth,
+						0,
+						tileWidth,
+						tileHeight );
+		
+		source.draw( 800, 600 );
+	}
+	
+//	final static public void main( final String[] args )
+//	{
+//		new ImageJ();
+//		
+//		final CATMAIDRandomAccessibleInterval map = new CATMAIDRandomAccessibleInterval(
+//				"http://catmaid.mpi-cbg.de/map/c-elegans/",
+//				6016,
+//				4464,
+//				803,
+//				0,
+//				256,
+//				256 );
+//		final ARGBScreenImage screenImage = new ARGBScreenImage( 1024, 1024 );
+//		final XYProjector< ARGBType, ARGBType > projector = new XYProjector< ARGBType, ARGBType >( map, screenImage, new TypeIdentity< ARGBType >() );
+//		projector.map();
+//		new ImagePlus( "map", new ColorProcessor( screenImage.image() ) ).show();
+//	}
 }

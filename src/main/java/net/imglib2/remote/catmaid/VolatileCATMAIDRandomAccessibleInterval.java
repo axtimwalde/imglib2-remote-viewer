@@ -18,6 +18,9 @@ package net.imglib2.remote.catmaid;
 
 
 
+import ij.ImagePlus;
+import ij.process.ColorProcessor;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.io.IOException;
@@ -30,9 +33,13 @@ import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 
 import net.imglib2.Interval;
+import net.imglib2.converter.Converter;
+import net.imglib2.display.ARGBScreenImage;
 import net.imglib2.display.VolatileNumericType;
+import net.imglib2.display.XYRandomAccessibleProjector;
 import net.imglib2.remote.Cache;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.view.Views;
 
 /**
  * <p>Read pixels served by the
@@ -106,6 +113,7 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 							/* replace WeakReferences by SoftReferences which promotes cache entries from third to second class citizens */
 							synchronized ( cache )
 							{
+								entry.setValid( true );
 								cache.remove( entry.key );
 								cache.putSoft( entry.key, entry );
 							}
@@ -142,7 +150,7 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 							final PixelGrabber pg = new PixelGrabber( image, 0, 0, tileWidth, tileHeight, entry.data, 0, tileWidth );
 							pg.grabPixels();
 							
-//							System.out.println( "success loading r=" + r + " c=" + c + " url(" + urlString + ")" );
+//							System.out.println( "success loading r=" + entry.key.r + " c=" + entry.key.c + " url(" + urlString + ")" );
 							
 						}
 						catch (final IOException e)
@@ -212,11 +220,11 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 			final long width,
 			final long height,
 			final long depth,
+			final int level,
 			final int tileWidth,
-			final int tileHeight,
-			final int level )
+			final int tileHeight )
 	{
-		super( url, width, height, depth, tileWidth, tileHeight, level );
+		super( url, width, height, depth, level, tileWidth, tileHeight );
 		
 		fetcher = new Fetcher();
 		fetcher.start();
@@ -229,7 +237,7 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 			final long depth,
 			final int level )
 	{
-		this( url, width, height, depth, 256, 256, level );
+		this( url, width, height, depth, level, 256, 256 );
 	}
 	
 	@Override
@@ -285,5 +293,70 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 	public void finalize()
 	{
 		fetcher.interrupt();
+	}
+	
+	/**
+	 * Test by displaying.
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	final public void draw( final int width, final int height )
+	{
+		final ARGBScreenImage target = new ARGBScreenImage( width, height );
+		final XYRandomAccessibleProjector< VolatileNumericType< ARGBType >, ARGBType > projector =
+				new XYRandomAccessibleProjector< VolatileNumericType<ARGBType>, ARGBType >(
+						Views.offset( this, this.dimension( 0 ) / 2, this.dimension( 1 ) / 2, this.dimension( 2 ) / 2 ),
+						target,
+						new Converter< VolatileNumericType< ARGBType >, ARGBType >()
+						{
+							@Override
+							public void convert( final VolatileNumericType< ARGBType > input, final ARGBType output )
+							{
+								if ( input.isValid() )
+									output.set( input.get() );
+							}
+						} );
+		
+		final ImagePlus imp = new ImagePlus( "test", new ColorProcessor( ( int )target.dimension( 0 ), ( int )target.dimension( 1 ) ) );
+		imp.show();
+		
+		long t, nTrials = 0;
+		
+		while ( true )
+		{
+			t = System.currentTimeMillis();
+			projector.map();
+			System.out.println( "trial " + ( ++nTrials ) + ": s = " + s + " took " + ( System.currentTimeMillis() - t ) + "ms" );
+				
+			imp.setImage( ( ( ARGBScreenImage )target ).image() );
+		}
+	}
+	
+	final static public void main( final String... args )
+	{
+		final long width = 1987;
+		final long height = 1441;
+		final long depth = 460;
+		
+		final double resXY = 5.6;
+		final double resZ = 11.2;
+		
+		final String baseUrl = "file:/home/saalfeld/tmp/catmaid/export-test/fib/aligned/xy/";
+		
+		final int tileWidth = 256;
+		final int tileHeight = 256;
+		
+		final VolatileCATMAIDRandomAccessibleInterval source =
+				new VolatileCATMAIDRandomAccessibleInterval(
+						baseUrl,
+						width,
+						height,
+						depth,
+						0,
+						tileWidth,
+						tileHeight );
+		
+		source.draw( 800, 600 );
 	}
 }

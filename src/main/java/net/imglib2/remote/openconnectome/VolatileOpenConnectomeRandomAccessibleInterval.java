@@ -16,8 +16,6 @@
  */
 package net.imglib2.remote.openconnectome;
 
-
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

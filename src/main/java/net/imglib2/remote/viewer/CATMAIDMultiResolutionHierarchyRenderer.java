@@ -80,6 +80,16 @@ public class CATMAIDMultiResolutionHierarchyRenderer< A extends AffineSet & Affi
 
 		final protected int numRenderingThreads;
 		
+		final static public int getNumScales( long width, long height, final long tileWidth, final long tileHeight )
+		{
+			int i = 0;
+			
+			while ( ( width >>= 1 ) > tileWidth && ( height >>= 1 ) > tileHeight )
+				++i;
+
+			return i;
+		}
+		
 		public Factory(
 				final AffineTransformType< B > transformType,
 				final InteractiveDisplayCanvasComponent< ? > canvas,
@@ -87,6 +97,7 @@ public class CATMAIDMultiResolutionHierarchyRenderer< A extends AffineSet & Affi
 				final long width,
 				final long height,
 				final long depth,
+				final double zScale,
 				final int tileWidth,
 				final int tileHeight,
 				final B sourceTransform,
@@ -101,14 +112,15 @@ public class CATMAIDMultiResolutionHierarchyRenderer< A extends AffineSet & Affi
 			this.targetRenderNanos = targetRenderNanos;
 			this.doubleBuffered = doubleBuffered;
 			this.numRenderingThreads = numRenderingThreads;
-			this.levelScales = new double[ 3 ];
+			levelScales = new double[ getNumScales( width, height, tileWidth, tileHeight ) ];
 			
 			for ( int level = 0; level < levelScales.length; level++ )
 			{
-				this.levelScales[ level ] = Math.pow( 2, level );
+				levelScales[ level ] = Math.pow( 2, level );
 				final B levelTransform = transformType.createTransform();
-				for ( int d = 0; d < 3; ++d )
-					levelTransform.set( levelScales[ level ], d, d );
+				levelTransform.set( levelScales[ level ], 0, 0 );
+				levelTransform.set( levelScales[ level ], 1, 1 );
+				levelTransform.set( zScale, 2, 2 );
 				levelTransform.set( -0.5 * ( levelScales[ level ] - 1 ), 0, 3 );
 				levelTransform.set( -0.5 * ( levelScales[ level ] - 1 ), 1, 3 );
 				
@@ -123,9 +135,9 @@ public class CATMAIDMultiResolutionHierarchyRenderer< A extends AffineSet & Affi
 						width,
 						height,
 						depth,
+						level,
 						tileWidth,
-						tileHeight,
-						level );
+						tileHeight );
 				
 				final ExtendedRandomAccessibleInterval< VolatileNumericType< ARGBType >, ? > extendedSource =
 						Views.extendValue( source, new VolatileNumericType< ARGBType >( new ARGBType( 0xff0000c0 ), true ) );

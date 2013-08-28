@@ -38,9 +38,7 @@
 package net.imglib2.remote.viewer;
 
 import net.imglib2.FinalInterval;
-import net.imglib2.display.VolatileNumericType;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.ui.AffineTransformType3D;
 import net.imglib2.ui.InteractiveDisplayCanvasComponent;
 import net.imglib2.ui.TransformEventHandler3D;
@@ -111,8 +109,8 @@ public class CATMAIDViewer
 						Defaults.numRenderingThreads );
 		
 		
-		final InteractiveRealViewer< VolatileNumericType< ARGBType >, AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > > viewer =
-				new InteractiveRealViewer< VolatileNumericType< ARGBType >, AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > >(
+		final InteractiveRealViewer< AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > > viewer =
+				new InteractiveRealViewer< AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > >(
 						AffineTransformType3D.instance,
 						canvas,
 						rendererFactory );

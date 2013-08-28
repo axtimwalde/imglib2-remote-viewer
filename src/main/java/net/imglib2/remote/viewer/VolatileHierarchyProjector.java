@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.imglib2.Cursor;
 import net.imglib2.FinalInterval;
@@ -58,23 +59,53 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 	final protected ArrayList< RandomAccessible< A > > sources = new ArrayList< RandomAccessible< A > >();
 	final protected ArrayImg< IntType, IntArray > mask;
 	protected boolean valid = false;
-	int s = 0;
+	protected int s = 0;
 	
+	/**
+	 * Extends of the source to be used for mapping.
+	 */
 	final protected FinalInterval sourceInterval;
 
-	final int width;
-	final int height;
-	final int cr;
+	/**
+	 * Target width
+	 */
+	final protected int width;
 	
-	final IterableInterval< B > iterableTarget;
+	/**
+	 * Target height
+	 */
+	final protected int height;
 	
+	/**
+	 * Steps for carriage return.  Typically -{@link #width}
+	 */
+	final protected int cr;
+	
+	/**
+	 * A reference to the target image as an iterable.  Used for source-less
+	 * operations such as clearing its content.
+	 */
+	final protected IterableInterval< B > iterableTarget;
+	
+	/**
+     * Number of threads to use for rendering
+     */
+    final protected int numThreads;
+
+    /**
+     * Time needed for rendering the last frame, in nano-seconds.
+     */
+    protected long lastFrameRenderNanoTime;
+	
+    final protected AtomicBoolean interrupted = new AtomicBoolean();
+
 	public VolatileHierarchyProjector(
 			final List< ? extends RandomAccessible< A > > sources,
 			final Converter< ? super A, B > converter,
 			final RandomAccessibleInterval< B > target,
 			final int numThreads )
 	{
-		super( Math.max( 2, sources.get( 0 ).numDimensions() ), converter, target, numThreads );
+		super( Math.max( 2, sources.get( 0 ).numDimensions() ), converter, target );
 
 		this.sources.addAll( sources );
 		s = sources.size();
@@ -93,7 +124,22 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 		height = ( int )target.dimension( 1 );
 		cr = -width;
 		
+		this.numThreads = numThreads;
+		lastFrameRenderNanoTime = -1;
+		
 		clear();
+	}
+	
+	@Override
+	public void cancel()
+	{
+		interrupted.set( true );
+	}
+
+	@Override
+	public long getLastFrameRenderNanoTime()
+	{
+		return lastFrameRenderNanoTime;
 	}
 	
 	/**

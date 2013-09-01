@@ -16,9 +16,6 @@
  */
 package net.imglib2.remote.viewer;
 
-import ij.ImagePlus;
-import ij.process.ColorProcessor;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -33,7 +30,6 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
-import net.imglib2.display.ARGBScreenImage;
 import net.imglib2.display.Projector;
 import net.imglib2.display.Volatile;
 import net.imglib2.img.array.ArrayCursor;
@@ -302,19 +298,19 @@ public class VolatileHierarchyProjector< T, A extends Volatile< T >, B extends N
 	}
 	
 	
-	final public void draw()
-	{
-		final ImagePlus imp = new ImagePlus( "test", new ColorProcessor( ( int )target.dimension( 0 ), ( int )target.dimension( 1 ) ) );
-		imp.show();
-		
-		long t, nTrials = 0;
-		while ( s > 0 )
-		{
-			t = System.currentTimeMillis();
-			map();
-			System.out.println( "trial " + ( ++nTrials ) + ": s = " + s + " took " + ( System.currentTimeMillis() - t ) + "ms" );
-			
-			imp.setImage( ( ( ARGBScreenImage )target ).image() );
-		}
-	}
+//	final public void draw()
+//	{
+//		final ImagePlus imp = new ImagePlus( "test", new ColorProcessor( ( int )target.dimension( 0 ), ( int )target.dimension( 1 ) ) );
+//		imp.show();
+//		
+//		long t, nTrials = 0;
+//		while ( s > 0 )
+//		{
+//			t = System.currentTimeMillis();
+//			map();
+//			System.out.println( "trial " + ( ++nTrials ) + ": s = " + s + " took " + ( System.currentTimeMillis() - t ) + "ms" );
+//			
+//			imp.setImage( ( ( ARGBScreenImage )target ).image() );
+//		}
+//	}
 }

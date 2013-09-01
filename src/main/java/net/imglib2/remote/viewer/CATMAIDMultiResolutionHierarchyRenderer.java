@@ -167,17 +167,19 @@ public class CATMAIDMultiResolutionHierarchyRenderer< A extends AffineSet & Affi
 					numRenderingThreads );
 			
 			// add KeyHandler for toggling interpolation
-			canvas.addHandler( new KeyAdapter() {
-				@Override
-				public void keyPressed( final KeyEvent e )
-				{
-					if ( e.getKeyCode() == KeyEvent.VK_I )
+			canvas.addHandler(
+					new KeyAdapter()
 					{
-						renderer.toggleInterpolation();
-						renderer.requestRepaint();
-					}
-				}
-			});
+						@Override
+						public void keyPressed( final KeyEvent e )
+						{
+							if ( e.getKeyCode() == KeyEvent.VK_I )
+							{
+								renderer.toggleInterpolation();
+								renderer.requestRepaint();
+							}
+						}
+					} );
 			
 			return renderer;
 		}		

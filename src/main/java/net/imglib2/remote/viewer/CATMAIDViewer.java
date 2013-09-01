@@ -16,6 +16,9 @@
  */
 package net.imglib2.remote.viewer;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
 import net.imglib2.FinalInterval;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.ui.AffineTransformType3D;
@@ -99,6 +102,20 @@ public class CATMAIDViewer
 		viewer.getDisplayCanvas().addTransformListener( box );
 		viewer.getDisplayCanvas().addOverlayRenderer( box );
 		viewer.getDisplayCanvas().addOverlayRenderer( new LogoPainter() );
+		
+		canvas.addHandler(
+				new KeyAdapter()
+				{
+					@Override
+					public void keyPressed( final KeyEvent e )
+					{
+						if ( e.getKeyCode() == KeyEvent.VK_ESCAPE )
+						{
+							System.exit( 0 );
+						}
+					}
+				} );
+		
 		viewer.requestRepaint();
 	}
 }

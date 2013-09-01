@@ -121,8 +121,10 @@ public class CATMAIDMultiResolutionHierarchyRenderer< A extends AffineSet & Affi
 				levelTransform.set( levelScales[ level ], 0, 0 );
 				levelTransform.set( levelScales[ level ], 1, 1 );
 				levelTransform.set( zScale, 2, 2 );
-				levelTransform.set( -0.5 * ( levelScales[ level ] - 1 ), 0, 3 );
-				levelTransform.set( -0.5 * ( levelScales[ level ] - 1 ), 1, 3 );
+//				levelTransform.set( -0.5 * ( levelScales[ level ] - 1 ), 0, 3 );
+//				levelTransform.set( -0.5 * ( levelScales[ level ] - 1 ), 1, 3 );
+				levelTransform.set( 0.5 * ( levelScales[ level ] - 1 ), 0, 3 );
+				levelTransform.set( 0.5 * ( levelScales[ level ] - 1 ), 1, 3 );
 				
 				final B sourceCopy = transformType.createTransform();
 				sourceCopy.set( sourceTransform.getRowPackedCopy() );

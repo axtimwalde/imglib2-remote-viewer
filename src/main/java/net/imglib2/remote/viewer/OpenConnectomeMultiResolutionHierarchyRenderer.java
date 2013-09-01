@@ -86,6 +86,7 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 				final InteractiveDisplayCanvasComponent< ? > canvas,
 				final String baseUrl,
 				final long[][] levelDimensions,
+				final long minZ,
 				final double[][] levelScales,
 				final int[][] levelCellDimensions,
 				final B sourceTransform,
@@ -117,15 +118,17 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 				
 				sourceTransforms.add( sourceCopy );
 				
-				final VolatileOpenConnectomeRandomAccessibleInterval source = new VolatileOpenConnectomeRandomAccessibleInterval(
-						baseUrl,
-						levelDimensions[ level ][ 0 ],
-						levelDimensions[ level ][ 1 ],
-						levelDimensions[ level ][ 2 ],
-						levelCellDimensions[ level ][ 0 ],
-						levelCellDimensions[ level ][ 1 ],
-						levelCellDimensions[ level ][ 2 ],
-						1, level );
+				final VolatileOpenConnectomeRandomAccessibleInterval source =
+						new VolatileOpenConnectomeRandomAccessibleInterval(
+							baseUrl,
+							levelDimensions[ level ][ 0 ],
+							levelDimensions[ level ][ 1 ],
+							levelDimensions[ level ][ 2 ],
+							levelCellDimensions[ level ][ 0 ],
+							levelCellDimensions[ level ][ 1 ],
+							levelCellDimensions[ level ][ 2 ],
+							minZ,
+							level );
 				
 				final ExtendedRandomAccessibleInterval< VolatileRealType< UnsignedByteType >, ? > extendedSource =
 						Views.extendValue( source, new VolatileRealType< UnsignedByteType >( new UnsignedByteType( 127 ), true ) );
@@ -259,7 +262,6 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 			final ARGBScreenImage screenImage )
 	{
 		interpolateAndTransform( viewerTransform, screenScaleTransform );
-		
 		final VolatileHierarchyProjector< UnsignedByteType, VolatileRealType< UnsignedByteType >, ARGBType > p =
 				new VolatileHierarchyProjector< UnsignedByteType, VolatileRealType< UnsignedByteType >, ARGBType >(
 						transformedSources,

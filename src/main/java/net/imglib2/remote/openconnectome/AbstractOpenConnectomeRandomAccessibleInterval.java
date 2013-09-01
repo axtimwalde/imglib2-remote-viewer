@@ -571,7 +571,63 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 	final protected int cellWidth, cellHeight, cellDepth, level;
 	protected long i;
 	
-	public AbstractOpenConnectomeRandomAccessibleInterval( final String url, final long width, final long height, final long depth, final int cellWidth, final int cellHeight, final int cellDepth, final long minZ, final int level )
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final Cache< Key, E > cache,
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final int cellWidth,
+			final int cellHeight,
+			final int cellDepth,
+			final long minZ,
+			final int level )
+	{
+		super( cache, new long[]{ width, height, depth } );
+		this.baseUrl = url + "/zip/";
+		this.cellWidth = cellWidth;
+		this.cellHeight = cellHeight;
+		this.cellDepth = cellDepth;
+		this.width = ( long )Math.ceil( ( double )width / cellWidth );
+		this.height = ( long )Math.ceil( ( double )height / cellHeight );
+		this.depth = ( long )Math.ceil( ( double )depth / cellDepth );
+		this.minZ = minZ;
+		this.level = level;
+	}
+	
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final Cache< Key, E > cache,
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final long minZ,
+			final int level )
+	{
+		this( cache, url, width, height, depth, 64, 64, 64, minZ, level );
+	}
+	
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final Cache< Key, E > cache,
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final int level )
+	{
+		this( cache, url, width, height, depth, 0, level );
+	}
+	
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final int cellWidth,
+			final int cellHeight,
+			final int cellDepth,
+			final long minZ,
+			final int level )
 	{
 		super( new long[]{ width, height, depth } );
 		this.baseUrl = url + "/zip/";
@@ -585,12 +641,23 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 		this.level = level;
 	}
 	
-	public AbstractOpenConnectomeRandomAccessibleInterval( final String url, final long width, final long height, final long depth, final long minZ, final int level )
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final long minZ,
+			final int level )
 	{
 		this( url, width, height, depth, 64, 64, 64, minZ, level );
 	}
 	
-	public AbstractOpenConnectomeRandomAccessibleInterval( final String url, final long width, final long height, final long depth, final int level )
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final int level )
 	{
 		this( url, width, height, depth, 0, level );
 	}

@@ -18,6 +18,8 @@ package net.imglib2.remote.viewer;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -259,6 +261,16 @@ public class OpenConnectomeViewer
 						{
 							System.exit( 0 );
 						}
+					}
+				} );
+		
+		viewer.getFrame().addWindowListener(
+				new WindowAdapter()
+				{
+					@Override
+					public void windowClosing( final WindowEvent e )
+					{
+						System.exit( 0 );
 					}
 				} );
 		

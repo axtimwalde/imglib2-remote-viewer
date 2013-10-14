@@ -16,13 +16,27 @@
  */
 package net.imglib2.remote.viewer;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.remote.openconnectome.OpenConnectomeMultiResolutionHierarchyRenderer;
+import net.imglib2.remote.openconnectome.OpenConnectomeTokenInfo;
 import net.imglib2.ui.AffineTransformType3D;
 import net.imglib2.ui.InteractiveDisplayCanvasComponent;
 import net.imglib2.ui.TransformEventHandler3D;
@@ -31,171 +45,135 @@ import net.imglib2.ui.overlay.LogoPainter;
 import net.imglib2.ui.util.Defaults;
 import net.imglib2.ui.viewer.InteractiveRealViewer;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
 public class OpenConnectomeViewer
 {
-//	final static protected String baseUrl = "http://openconnecto.me/emca/kasthuri11";
-//	
-//	final static protected long minZ = 1;
-//	
-//	final static protected long[][] levelDimensions = new long[][]{
-//			{ 21504, 26624, 1850 },
-//			{ 10752, 13312, 1850 },
-//			{ 5376, 6656, 1850 },
-////			{ 2816, 3328, 1850 },
-//			{ 2688, 3328, 1850 },
-////			{ 1536, 1792, 1850 },
-//			{ 1408, 1664, 1850 },
-////			{ 768, 1024, 1850 },
-//			{ 704, 832, 1850 },
-////			{ 512, 512, 1850 },
-//			{ 384, 448, 1850 },
-////			{ 256, 256, 1850 } };
-//			{ 192, 256, 1850 } };
-//	
-//	final static protected double[][] levelScales = new double[][]{
-//			{ 1, 1, 10 },
-//			{ 2, 2, 10 },
-//			{ 4, 4, 10 },
-//			{ 8, 8, 10 },
-//			{ 16, 16, 10 },
-//			{ 32, 32, 10 },
-//			{ 64, 64, 10 },
-//			{ 128, 128, 10 } };
-//	
-////	final static protected int[][] levelCellDimensions = new int[][]{
-////			{ 128, 128, 16 },
-////			{ 128, 128, 16 },
-////			{ 128, 128, 16 },
-////			{ 128, 128, 16 },
-////			{ 128, 128, 16 },
-////			{ 128, 128, 16 },
-////			{ 64, 64, 64 },
-////			{ 64, 64, 64 } };
-//	
-//	final static protected int[][] levelCellDimensions = new int[][]{
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 },
-//		{ 64, 64, 8 } };
+	final protected JPanel toolbar;
+	protected String[] tokens;
 	
-	final static protected String baseUrl = "http://openconnecto.me/emca/bock11";
-	
-	final static protected long[][] levelDimensions = new long[][]{
-		{ 135424, 119808, 1239 },
-//		{ 67840, 59904, 1239 },
-		{ 67712, 59904, 1239 },
-//		{ 34048, 29952, 1239 },
-		{ 33920, 29952, 1239 },
-//		{ 17152, 15104, 1239 },
-		{ 17024, 14976, 1239 },
-//		{ 8704, 7680, 1239 },
-		{ 8576, 7552, 1239 },
-		{ 4352, 3840, 1239 },
-//		{ 2304, 2048, 1239 },
-		{ 2176, 1920, 1239 },
-//		{ 1280, 1024, 1239 },
-		{ 1088, 960, 1239 },
-//		{ 768, 768, 1239 },
-		{ 576, 512, 1239 },
-//		{ 512, 512, 1239 },
-		{ 320, 256, 1239 },
-//		{ 256, 256, 1239 } };
-		{ 192, 128, 1239 } };
-	
-	final static protected long minZ = 2917;
-	
-	final static protected double[][] levelScales = new double[][]{
-		{ 1, 1, 10 },
-		{ 2, 2, 10 },
-		{ 4, 4, 10 },
-		{ 8, 8, 10 },
-		{ 16, 16, 10 },
-		{ 32, 32, 10 },
-		{ 64, 64, 10 },
-		{ 128, 128, 10 },
-		{ 256, 256, 10 },
-		{ 512, 512, 10 },
-		{ 1024, 1024, 10 } };
-	
-	final static protected int[][] levelCellDimensions = new int[][]{
-		{ 64, 64, 8 },
-		{ 64, 64, 8 },
-		{ 64, 64, 8 },
-		{ 64, 64, 8 },
-		{ 64, 64, 8 },
-		{ 64, 64, 4 },
-		{ 64, 64, 4 },
-		{ 64, 64, 4 },
-		{ 64, 64, 2 },
-		{ 64, 64, 2 },
-		{ 64, 64, 2 } };
-	
-//	final static public void main( final String[] args )
-//	{
-//		final int w = 800, h = 450;
-//
-//		final AffineTransform3D initial = new AffineTransform3D();
-//		initial.set(
-//			1.0, 0.0, 0.0, -levelDimensions[ 0 ][ 0 ] * levelScales[ 0 ][ 0 ] / 2.0,
-//			0.0, 1.0, 0.0, -levelDimensions[ 0 ][ 1 ] * levelScales[ 0 ][ 1 ] / 2.0,
-//			0.0, 0.0, 1.0, -levelDimensions[ 0 ][ 2 ] * levelScales[ 0 ][ 2 ] / 2.0 );
-//
-//		final FinalInterval sourceInterval = new FinalInterval(
-//				( long )Math.round( levelDimensions[ 0 ][ 0 ] * levelScales[ 0 ][ 0 ] ),
-//				( long )Math.round( levelDimensions[ 0 ][ 1 ] * levelScales[ 0 ][ 1 ] ),
-//				( long )Math.round( levelDimensions[ 0 ][ 2 ] * levelScales[ 0 ][ 2 ] ) );
-//		
-//		/* interactive canvas */
-//		final InteractiveDisplayCanvasComponent< AffineTransform3D > canvas =
-//				new InteractiveDisplayCanvasComponent< AffineTransform3D >( w, h, TransformEventHandler3D.factory() );
-//		
-//		/* renderer */
-////		final OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
-////				new OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D >(
-////						new AffineTransformType3D(),
-////						canvas,
-////						"http://openconnecto.me/emca/kasthuri11",
-////						levelDimensions,
-////						levelScales,
-////						levelCellDimensions,
-////						initial );
-//		final OpenConnectomeMultiResolutionHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
-//				new OpenConnectomeMultiResolutionHierarchyRenderer.Factory< AffineTransform3D >(
-//						new AffineTransformType3D(),
-//						canvas,
-//						"http://openconnecto.me/emca/kasthuri11",
-//						levelDimensions,
-//						levelScales,
-//						levelCellDimensions,
-//						initial,
-////						new double[]{ 1, 0.5, 0.25, 0.125, 0.0625, 0.03125 },
-//						Defaults.screenScales,
-//						Defaults.targetRenderNanos,
-//						Defaults.doubleBuffered,
-//						Defaults.numRenderingThreads );
-//		
-//		
-//		final InteractiveRealViewer< AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > > viewer =
-//				new InteractiveRealViewer< AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > >(
-//						AffineTransformType3D.instance,
-//						canvas,
-//						rendererFactory );
-//
-//		final BoxOverlayRenderer box = new BoxOverlayRenderer( w, h );
-//		box.setSource( sourceInterval, initial );
-//		viewer.getDisplayCanvas().addTransformListener( box );
-//		viewer.getDisplayCanvas().addOverlayRenderer( box );
-//		viewer.getDisplayCanvas().addOverlayRenderer( new LogoPainter() );
-//		viewer.requestRepaint();
-//	}
-	
-	final static public void main( final String[] args )
+	/**
+	 * Fetch the list of public tokens from
+	 * {@linkplain http://rio.cs.jhu.edu/emca/public_tokens/}
+	 * 
+	 * @return a list of {@link String Strings}
+	 * @throws JsonSyntaxException
+	 * @throws JsonIOException
+	 * @throws IOException
+	 */
+	final static public String[] fetchTokenList()
+			throws JsonSyntaxException, JsonIOException, IOException
 	{
+		final Gson gson = new Gson();
+		final URL url = new URL( "http://rio.cs.jhu.edu/emca/public_tokens/" );
+		final String[][] response = gson.fromJson( new InputStreamReader( url.openStream() ), String[][].class );
+		final String[] tokens = new String[ response.length ];
+		for ( int i = 0; i < response.length; ++i )
+			tokens[ i ] = response[ i ][ 0 ];
+		return tokens;
+	}
+	
+	/**
+	 * Fetch information for a token from
+	 * {@linkplain http://rio.cs.jhu.edu/emca/<token>/info/}.
+	 * 
+	 * @param token
+	 * @return an {@link OpenConnectomeTokenInfo} instance that carries the token information
+	 * @throws JsonSyntaxException
+	 * @throws JsonIOException
+	 * @throws IOException
+	 */
+	final static public OpenConnectomeTokenInfo fetchTokenInfo( final String token )
+			throws JsonSyntaxException, JsonIOException, IOException
+	{
+		final Gson gson = new Gson();
+		final URL url = new URL( "http://rio.cs.jhu.edu/emca/" + token + "/info/" );
+		return gson.fromJson( new InputStreamReader( url.openStream() ), OpenConnectomeTokenInfo.class );
+	}
+	
+	/**
+	 * Try to fetch the list of public tokens from
+	 * {@linkplain http://rio.cs.jhu.edu/emca/public_tokens/}.
+	 * 
+	 * @param maxNumTrials the maximum number of trials
+	 * 
+	 * @return a list of {@link String Strings} or <code>null</code> if
+	 * 		<code>maxNumTrials</code> were executed without success
+	 */
+	final static public String[] tryFetchTokenList( final int maxNumTrials )
+	{
+		String[] tokens = null;
+		for ( int i = 0; i < maxNumTrials && tokens == null; ++i )
+		{
+			try
+			{
+				tokens = fetchTokenList();
+				break;
+			}
+			catch ( final Exception e ) {}
+			try
+			{
+				Thread.sleep( 100 );
+			}
+			catch ( final InterruptedException e ) {}
+		}
+		return tokens;
+	}
+	
+	
+	/**
+	 * Try to fetch information for a token from
+	 * {@linkplain http://rio.cs.jhu.edu/emca/<token>/info/}.
+	 * 
+	 * @param token
+	 * @param maxNumTrials
+	 * @return an {@link OpenConnectomeTokenInfo} instance that carries the
+	 * 		token information or <code>null</code> if <code>maxNumTrials</code>
+	 * 		were executed without success
+	 */
+	final static public OpenConnectomeTokenInfo tryFetchTokenInfo( final String token, final int maxNumTrials )
+	{
+		OpenConnectomeTokenInfo info = null;
+		for ( int i = 0; i < maxNumTrials && info == null; ++i )
+		{
+			try
+			{
+				info = fetchTokenInfo( token );
+				break;
+			}
+			catch ( final Exception e ) {}
+			try
+			{
+				Thread.sleep( 100 );
+			}
+			catch ( final InterruptedException e ) {}
+		}
+		return info;
+	}
+	
+	
+	public OpenConnectomeViewer() throws InterruptedException
+	{
+		tokens = tryFetchTokenList( 20 );
+		final OpenConnectomeTokenInfo info = tryFetchTokenInfo( tokens[ 9 ], 20 );
+		
+		System.out.println( new Gson().toJson( info ) );
+		System.out.println( new Gson().toJson( tokens ) );
+		
+		/* divide cell size by 2 */
+		for ( final int[] levelCellDimension : info.dataset.cube_dimension.values() )
+		{
+			levelCellDimension[ 0 ] /= 2;
+			levelCellDimension[ 1 ] /= 2;
+			levelCellDimension[ 2 ] /= 2;
+		}
+		
 		final int w = 800, h = 450;
+		
+		final long[][] levelDimensions = info.getLevelDimensions();
+		final double[][] levelScales = info.getLevelScales();
 
 		final AffineTransform3D initial = new AffineTransform3D();
 		initial.set(
@@ -212,25 +190,11 @@ public class OpenConnectomeViewer
 		final InteractiveDisplayCanvasComponent< AffineTransform3D > canvas =
 				new InteractiveDisplayCanvasComponent< AffineTransform3D >( w, h, TransformEventHandler3D.factory() );
 		
-		/* renderer */
-//		final OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
-//				new OpenConnectomeHierarchyRenderer.Factory< AffineTransform3D >(
-//						new AffineTransformType3D(),
-//						canvas,
-//						"http://openconnecto.me/emca/kasthuri11",
-//						levelDimensions,
-//						levelScales,
-//						levelCellDimensions,
-//						initial );
 		final OpenConnectomeMultiResolutionHierarchyRenderer.Factory< AffineTransform3D > rendererFactory =
 				new OpenConnectomeMultiResolutionHierarchyRenderer.Factory< AffineTransform3D >(
 						new AffineTransformType3D(),
 						canvas,
-						baseUrl,
-						levelDimensions,
-						minZ,
-						levelScales,
-						levelCellDimensions,
+						info,
 						initial,
 //						new double[]{ 1, 0.5, 0.25, 0.125, 0.0625, 0.03125 },
 						Defaults.screenScales,
@@ -238,18 +202,23 @@ public class OpenConnectomeViewer
 						Defaults.doubleBuffered,
 						Defaults.numRenderingThreads );
 		
-		
 		final InteractiveRealViewer< AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > > viewer =
 				new InteractiveRealViewer< AffineTransform3D, InteractiveDisplayCanvasComponent< AffineTransform3D > >(
 						AffineTransformType3D.instance,
 						canvas,
 						rendererFactory );
-
+		
 		final BoxOverlayRenderer box = new BoxOverlayRenderer( w, h );
 		box.setSource( sourceInterval, initial );
 		viewer.getDisplayCanvas().addTransformListener( box );
 		viewer.getDisplayCanvas().addOverlayRenderer( box );
 		viewer.getDisplayCanvas().addOverlayRenderer( new LogoPainter() );
+		
+		toolbar = createToolbar();
+		final JFrame frame = viewer.getFrame();
+		final Container cp = frame.getContentPane();
+		cp.add( toolbar, BorderLayout.NORTH );
+		frame.pack();
 		
 		canvas.addHandler(
 				new KeyAdapter()
@@ -257,14 +226,19 @@ public class OpenConnectomeViewer
 					@Override
 					public void keyPressed( final KeyEvent e )
 					{
-						if ( e.getKeyCode() == KeyEvent.VK_ESCAPE )
+						switch ( e.getKeyCode() )
 						{
+						case KeyEvent.VK_ESCAPE:
 							System.exit( 0 );
+							break;
+						case KeyEvent.VK_T:
+							toggleToolbar();
+							break;
 						}
 					}
 				} );
 		
-		viewer.getFrame().addWindowListener(
+		frame.addWindowListener(
 				new WindowAdapter()
 				{
 					@Override
@@ -275,5 +249,33 @@ public class OpenConnectomeViewer
 				} );
 		
 		viewer.requestRepaint();
+	}
+	
+	
+	final public JPanel createToolbar()
+	{
+		final JPanel panel = new JPanel();
+		panel.setAlignmentX( Component.LEFT_ALIGNMENT );
+		final JComboBox tokenList = new JComboBox( tokens );
+		
+		tokenList.setSelectedIndex( 0 );
+//        tokenList.addActionListener( this );
+		
+		final JButton test = new JButton( "Button" );
+		panel.add( tokenList );
+		panel.add( Box.createHorizontalGlue() );
+		panel.add( test );
+		return panel;
+	}
+	
+	final public void toggleToolbar()
+	{
+		toolbar.setVisible( !toolbar.isVisible() );
+	}
+	
+	
+	final static public void main( final String[] args ) throws InterruptedException
+	{
+		final OpenConnectomeViewer openConnectomeViewer = new OpenConnectomeViewer();
 	}
 }

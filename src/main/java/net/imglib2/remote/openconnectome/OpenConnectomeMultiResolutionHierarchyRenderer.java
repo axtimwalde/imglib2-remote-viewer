@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package net.imglib2.remote.viewer;
+package net.imglib2.remote.openconnectome;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -33,7 +33,7 @@ import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineSet;
 import net.imglib2.realtransform.RealViews;
-import net.imglib2.remote.openconnectome.VolatileOpenConnectomeRandomAccessibleInterval;
+import net.imglib2.remote.viewer.VolatileHierarchyProjector;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.ui.AbstractMultiResolutionRenderer;
@@ -68,10 +68,12 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 		
 		final protected InteractiveDisplayCanvasComponent< ? > canvas;
 		
-		final ArrayList< ExtendedRandomAccessibleInterval< VolatileRealType< UnsignedByteType >, ? > > sources = new ArrayList< ExtendedRandomAccessibleInterval< VolatileRealType< UnsignedByteType >, ? > >();
-		final ArrayList< B > sourceTransforms = new ArrayList< B >();
-		final ArrayList< B > sourceToScreens = new ArrayList< B >();
-		final double[][] levelScales;
+		final protected B sourceTransform;
+		
+		final protected ArrayList< ExtendedRandomAccessibleInterval< VolatileRealType< UnsignedByteType >, ? > > sources = new ArrayList< ExtendedRandomAccessibleInterval< VolatileRealType< UnsignedByteType >, ? > >();
+		final protected ArrayList< B > sourceTransforms = new ArrayList< B >();
+		final protected ArrayList< B > sourceToScreens = new ArrayList< B >();
+		protected double[][] levelScales;
 		
 		final protected double[] screenScales;
 
@@ -97,11 +99,52 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 		{
 			this.transformType = transformType;
 			this.canvas = canvas;
+			this.sourceTransform = sourceTransform;
 			this.screenScales = screenScales;
 			this.targetRenderNanos = targetRenderNanos;
 			this.doubleBuffered = doubleBuffered;
 			this.numRenderingThreads = numRenderingThreads;
+			
+			setSource( baseUrl, levelDimensions, minZ, levelScales, levelCellDimensions );
+		}
+		
+		public Factory(
+				final AffineTransformType< B > transformType,
+				final InteractiveDisplayCanvasComponent< ? > canvas,
+				final OpenConnectomeTokenInfo tokenInfo,
+				final B sourceTransform,
+				final double[] screenScales,
+				final long targetRenderNanos,
+				final boolean doubleBuffered,
+				final int numRenderingThreads )
+		{
+			this(
+					transformType,
+					canvas,
+					tokenInfo.getBaseUrl(),
+					tokenInfo.getLevelDimensions(),
+					tokenInfo.getMinZ(),
+					tokenInfo.getLevelScales(),
+					tokenInfo.getLevelCellDimensions(),
+					sourceTransform,
+					screenScales,
+					targetRenderNanos,
+					doubleBuffered,
+					numRenderingThreads );
+		}
+		
+		
+		public void setSource(
+				final String baseUrl,
+				final long[][] levelDimensions,
+				final long minZ,
+				final double[][] levelScales,
+				final int[][] levelCellDimensions )
+		{
 			this.levelScales = new double[ levelScales.length ][];
+			sourceTransforms.clear();
+			sources.clear();
+			sourceToScreens.clear();
 			
 			for ( int level = 0; level < levelScales.length; level++ )
 			{

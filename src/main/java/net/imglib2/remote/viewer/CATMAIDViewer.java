@@ -21,6 +21,7 @@ import java.awt.event.KeyEvent;
 
 import net.imglib2.FinalInterval;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.remote.catmaid.CATMAIDMultiResolutionHierarchyRenderer;
 import net.imglib2.ui.AffineTransformType3D;
 import net.imglib2.ui.InteractiveDisplayCanvasComponent;
 import net.imglib2.ui.TransformEventHandler3D;

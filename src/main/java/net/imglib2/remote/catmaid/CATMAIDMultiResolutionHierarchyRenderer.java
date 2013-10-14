@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package net.imglib2.remote.viewer;
+package net.imglib2.remote.catmaid;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -33,7 +33,7 @@ import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineSet;
 import net.imglib2.realtransform.RealViews;
-import net.imglib2.remote.catmaid.VolatileCATMAIDRandomAccessibleInterval;
+import net.imglib2.remote.viewer.VolatileHierarchyProjector;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.ui.AbstractMultiResolutionRenderer;
 import net.imglib2.ui.AffineTransformType;

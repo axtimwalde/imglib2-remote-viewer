@@ -87,6 +87,7 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 				final AffineTransformType< B > transformType,
 				final InteractiveDisplayCanvasComponent< ? > canvas,
 				final String baseUrl,
+				final String mode,
 				final long[][] levelDimensions,
 				final long minZ,
 				final double[][] levelScales,
@@ -105,13 +106,14 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 			this.doubleBuffered = doubleBuffered;
 			this.numRenderingThreads = numRenderingThreads;
 			
-			setSource( baseUrl, levelDimensions, minZ, levelScales, levelCellDimensions );
+			setSource( baseUrl, mode, levelDimensions, minZ, levelScales, levelCellDimensions );
 		}
 		
 		public Factory(
 				final AffineTransformType< B > transformType,
 				final InteractiveDisplayCanvasComponent< ? > canvas,
 				final OpenConnectomeTokenInfo tokenInfo,
+				final String mode,
 				final B sourceTransform,
 				final double[] screenScales,
 				final long targetRenderNanos,
@@ -122,9 +124,11 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 					transformType,
 					canvas,
 					tokenInfo.getBaseUrl(),
-					tokenInfo.getLevelDimensions(),
+					mode,
+					tokenInfo.getLevelDimensions( mode ),
 					tokenInfo.getMinZ(),
-					tokenInfo.getLevelScales(),
+					tokenInfo.getLevelScales( mode ),
+//					tokenInfo.getLevelScales(),
 					tokenInfo.getLevelCellDimensions(),
 					sourceTransform,
 					screenScales,
@@ -136,6 +140,7 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 		
 		public void setSource(
 				final String baseUrl,
+				final String mode,
 				final long[][] levelDimensions,
 				final long minZ,
 				final double[][] levelScales,
@@ -154,6 +159,7 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 					levelTransform.set( levelScales[ level ][ d ], d, d );
 				levelTransform.set( -0.5 * ( levelScales[ level ][ 0 ] - 1 ), 0, 3 );
 				levelTransform.set( -0.5 * ( levelScales[ level ][ 1 ] - 1 ), 1, 3 );
+				levelTransform.set( -0.5 * ( levelScales[ level ][ 2 ] - 1 ), 2, 3 );
 				
 				final B sourceCopy = transformType.createTransform();
 				sourceCopy.set( sourceTransform.getRowPackedCopy() );
@@ -164,6 +170,7 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 				final VolatileOpenConnectomeRandomAccessibleInterval source =
 						new VolatileOpenConnectomeRandomAccessibleInterval(
 							baseUrl,
+							mode,
 							levelDimensions[ level ][ 0 ],
 							levelDimensions[ level ][ 1 ],
 							levelDimensions[ level ][ 2 ],

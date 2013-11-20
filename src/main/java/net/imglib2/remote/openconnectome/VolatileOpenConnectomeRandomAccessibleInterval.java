@@ -130,7 +130,10 @@ public class VolatileOpenConnectomeRandomAccessibleInterval extends
 						url.append( z0 );
 						url.append( "," );
 						url.append( z0 + cellDepth );
-						url.append( "/" );
+						url.append( mode );
+//						url.append( "/iso/" );
+						
+//						System.out.println( url );
 						
 						try
 						{
@@ -218,6 +221,7 @@ public class VolatileOpenConnectomeRandomAccessibleInterval extends
 	
 	public VolatileOpenConnectomeRandomAccessibleInterval(
 			final String url,
+			final String mode,
 			final long width,
 			final long height,
 			final long depth,
@@ -227,10 +231,24 @@ public class VolatileOpenConnectomeRandomAccessibleInterval extends
 			final long minZ,
 			final int level )
 	{
-		super( url, width, height, depth, cellWidth, cellHeight, cellDepth, minZ, level );
+		super( url, mode, width, height, depth, cellWidth, cellHeight, cellDepth, minZ, level );
 		
 		fetcher = new Fetcher();
 		fetcher.start();
+	}
+	
+	public VolatileOpenConnectomeRandomAccessibleInterval(
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final int cellWidth,
+			final int cellHeight,
+			final int cellDepth,
+			final long minZ,
+			final int level )
+	{
+		this( url, null, width, height, depth, cellWidth, cellHeight, cellDepth, minZ, level );
 	}
 	
 	public VolatileOpenConnectomeRandomAccessibleInterval(

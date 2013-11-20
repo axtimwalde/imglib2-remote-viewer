@@ -56,7 +56,7 @@ public class OpenConnectomeViewer
 	
 	/**
 	 * Fetch the list of public tokens from
-	 * {@linkplain http://rio.cs.jhu.edu/emca/public_tokens/}
+	 * {@linkplain http://braingraph2.cs.jhu.edu/emca/public_tokens/}
 	 * 
 	 * @return a list of {@link String Strings}
 	 * @throws JsonSyntaxException
@@ -67,17 +67,14 @@ public class OpenConnectomeViewer
 			throws JsonSyntaxException, JsonIOException, IOException
 	{
 		final Gson gson = new Gson();
-		final URL url = new URL( "http://rio.cs.jhu.edu/emca/public_tokens/" );
-		final String[][] response = gson.fromJson( new InputStreamReader( url.openStream() ), String[][].class );
-		final String[] tokens = new String[ response.length ];
-		for ( int i = 0; i < response.length; ++i )
-			tokens[ i ] = response[ i ][ 0 ];
+		final URL url = new URL( "http://braingraph2.cs.jhu.edu/emca/public_tokens/" );
+		final String[] tokens = gson.fromJson( new InputStreamReader( url.openStream() ), String[].class );
 		return tokens;
 	}
 	
 	/**
 	 * Fetch information for a token from
-	 * {@linkplain http://rio.cs.jhu.edu/emca/<token>/info/}.
+	 * {@linkplain http://braingraph2.cs.jhu.edu/emca/<token>/info/}.
 	 * 
 	 * @param token
 	 * @return an {@link OpenConnectomeTokenInfo} instance that carries the token information
@@ -89,13 +86,13 @@ public class OpenConnectomeViewer
 			throws JsonSyntaxException, JsonIOException, IOException
 	{
 		final Gson gson = new Gson();
-		final URL url = new URL( "http://rio.cs.jhu.edu/emca/" + token + "/info/" );
+		final URL url = new URL( "http://braingraph2.cs.jhu.edu/emca/" + token + "/info/" );
 		return gson.fromJson( new InputStreamReader( url.openStream() ), OpenConnectomeTokenInfo.class );
 	}
 	
 	/**
 	 * Try to fetch the list of public tokens from
-	 * {@linkplain http://rio.cs.jhu.edu/emca/public_tokens/}.
+	 * {@linkplain http://braingraph2.cs.jhu.edu/emca/public_tokens/}.
 	 * 
 	 * @param maxNumTrials the maximum number of trials
 	 * 
@@ -125,7 +122,7 @@ public class OpenConnectomeViewer
 	
 	/**
 	 * Try to fetch information for a token from
-	 * {@linkplain http://rio.cs.jhu.edu/emca/<token>/info/}.
+	 * {@linkplain http://braingraph2.cs.jhu.edu/emca/<token>/info/}.
 	 * 
 	 * @param token
 	 * @param maxNumTrials
@@ -157,10 +154,18 @@ public class OpenConnectomeViewer
 	public OpenConnectomeViewer() throws InterruptedException
 	{
 		tokens = tryFetchTokenList( 20 );
-		final OpenConnectomeTokenInfo info = tryFetchTokenInfo( tokens[ 9 ], 20 );
+		final String mode = "neariso";
+		final OpenConnectomeTokenInfo info = tryFetchTokenInfo( tokens[ 0 ], 20 );
 		
 		System.out.println( new Gson().toJson( info ) );
 		System.out.println( new Gson().toJson( tokens ) );
+		
+		for ( int i = 0; i < info.getLevelScales( mode ).length; ++i )
+			System.out.println(
+					i + ": " +
+					info.getLevelScales( mode )[ i ][ 0 ] + ", " +
+					info.getLevelScales( mode )[ i ][ 1 ] + ", " +
+					info.getLevelScales( mode )[ i ][ 2 ] );
 		
 		/* divide cell size by 2 */
 		for ( final int[] levelCellDimension : info.dataset.cube_dimension.values() )
@@ -172,8 +177,8 @@ public class OpenConnectomeViewer
 		
 		final int w = 800, h = 450;
 		
-		final long[][] levelDimensions = info.getLevelDimensions();
-		final double[][] levelScales = info.getLevelScales();
+		final long[][] levelDimensions = info.getLevelDimensions( mode );
+		final double[][] levelScales = info.getLevelScales( mode );
 
 		final AffineTransform3D initial = new AffineTransform3D();
 		initial.set(
@@ -195,6 +200,7 @@ public class OpenConnectomeViewer
 						new AffineTransformType3D(),
 						canvas,
 						info,
+						"neariso",
 						initial,
 //						new double[]{ 1, 0.5, 0.25, 0.125, 0.0625, 0.03125 },
 						Defaults.screenScales,
@@ -273,9 +279,9 @@ public class OpenConnectomeViewer
 		toolbar.setVisible( !toolbar.isVisible() );
 	}
 	
-	
 	final static public void main( final String[] args ) throws InterruptedException
 	{
+		final Gson gson = new Gson();
 		final OpenConnectomeViewer openConnectomeViewer = new OpenConnectomeViewer();
 	}
 }

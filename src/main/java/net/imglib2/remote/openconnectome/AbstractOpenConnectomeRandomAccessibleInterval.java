@@ -566,10 +566,36 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 		}
 	}
 	
-	final protected String baseUrl;
+	final protected String baseUrl, mode;
 	final protected long height, width, depth, minZ;
 	final protected int cellWidth, cellHeight, cellDepth, level;
 	protected long i;
+	
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final Cache< Key, E > cache,
+			final String url,
+			final String mode,
+			final long width,
+			final long height,
+			final long depth,
+			final int cellWidth,
+			final int cellHeight,
+			final int cellDepth,
+			final long minZ,
+			final int level )
+	{
+		super( cache, new long[]{ width, height, depth } );
+		this.baseUrl = url + "/zip/";
+		this.mode = "/" + mode + ( mode == null || mode.equals( "" ) ? "" : "/" );
+		this.cellWidth = cellWidth;
+		this.cellHeight = cellHeight;
+		this.cellDepth = cellDepth;
+		this.width = ( long )Math.ceil( ( double )width / cellWidth );
+		this.height = ( long )Math.ceil( ( double )height / cellHeight );
+		this.depth = ( long )Math.ceil( ( double )depth / cellDepth );
+		this.minZ = minZ;
+		this.level = level;
+	}
 	
 	public AbstractOpenConnectomeRandomAccessibleInterval(
 			final Cache< Key, E > cache,
@@ -583,16 +609,7 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 			final long minZ,
 			final int level )
 	{
-		super( cache, new long[]{ width, height, depth } );
-		this.baseUrl = url + "/zip/";
-		this.cellWidth = cellWidth;
-		this.cellHeight = cellHeight;
-		this.cellDepth = cellDepth;
-		this.width = ( long )Math.ceil( ( double )width / cellWidth );
-		this.height = ( long )Math.ceil( ( double )height / cellHeight );
-		this.depth = ( long )Math.ceil( ( double )depth / cellDepth );
-		this.minZ = minZ;
-		this.level = level;
+		this( cache, url, null, width, height, depth, cellWidth, cellHeight, cellDepth, minZ, level );
 	}
 	
 	public AbstractOpenConnectomeRandomAccessibleInterval(
@@ -620,6 +637,7 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 	
 	public AbstractOpenConnectomeRandomAccessibleInterval(
 			final String url,
+			final String mode,
 			final long width,
 			final long height,
 			final long depth,
@@ -631,6 +649,7 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 	{
 		super( new long[]{ width, height, depth } );
 		this.baseUrl = url + "/zip/";
+		this.mode = "/" + mode + ( mode == null || mode.equals( "" ) ? "" : "/" );
 		this.cellWidth = cellWidth;
 		this.cellHeight = cellHeight;
 		this.cellDepth = cellDepth;
@@ -639,6 +658,20 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 		this.depth = ( long )Math.ceil( ( double )depth / cellDepth );
 		this.minZ = minZ;
 		this.level = level;
+	}
+	
+	public AbstractOpenConnectomeRandomAccessibleInterval(
+			final String url,
+			final long width,
+			final long height,
+			final long depth,
+			final int cellWidth,
+			final int cellHeight,
+			final int cellDepth,
+			final long minZ,
+			final int level )
+	{
+		this( url, null, width, height, depth, cellWidth, cellHeight, cellDepth, minZ, level );
 	}
 	
 	public AbstractOpenConnectomeRandomAccessibleInterval(
@@ -688,7 +721,7 @@ abstract public class AbstractOpenConnectomeRandomAccessibleInterval<
 		url.append( z0 );
 		url.append( "," );
 		url.append( z0 + cellDepth );
-		url.append( "/" );
+		url.append( mode );
 		
 		try
 		{

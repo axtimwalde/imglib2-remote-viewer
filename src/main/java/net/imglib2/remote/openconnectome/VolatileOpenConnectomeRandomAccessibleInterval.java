@@ -28,9 +28,9 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import net.imglib2.Interval;
-import net.imglib2.display.VolatileRealType;
 import net.imglib2.remote.Cache;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.volatiles.VolatileRealType;
 
 /**
  * <p>Read pixels served by the

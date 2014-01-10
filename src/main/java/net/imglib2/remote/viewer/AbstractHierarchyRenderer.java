@@ -19,7 +19,7 @@ package net.imglib2.remote.viewer;
 import java.awt.image.BufferedImage;
 
 import net.imglib2.concatenate.Concatenable;
-import net.imglib2.display.ARGBScreenImage;
+import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineSet;
 import net.imglib2.ui.AbstractRenderer;

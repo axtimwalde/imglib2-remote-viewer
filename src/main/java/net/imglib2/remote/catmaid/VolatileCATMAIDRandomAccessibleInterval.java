@@ -34,11 +34,11 @@ import javax.imageio.ImageIO;
 
 import net.imglib2.Interval;
 import net.imglib2.converter.Converter;
-import net.imglib2.display.ARGBScreenImage;
-import net.imglib2.display.VolatileNumericType;
-import net.imglib2.display.XYRandomAccessibleProjector;
+import net.imglib2.display.projector.Projector2D;
+import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.remote.Cache;
 import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.volatiles.VolatileNumericType;
 import net.imglib2.view.Views;
 
 /**
@@ -304,8 +304,10 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 	final public void draw( final int width, final int height )
 	{
 		final ARGBScreenImage target = new ARGBScreenImage( width, height );
-		final XYRandomAccessibleProjector< VolatileNumericType< ARGBType >, ARGBType > projector =
-				new XYRandomAccessibleProjector< VolatileNumericType<ARGBType>, ARGBType >(
+		final Projector2D< VolatileNumericType< ARGBType >, ARGBType > projector =
+				new Projector2D< VolatileNumericType<ARGBType>, ARGBType >(
+						0,
+						1,
 						Views.offset( this, this.dimension( 0 ) / 2, this.dimension( 1 ) / 2, this.dimension( 2 ) / 2 ),
 						target,
 						new Converter< VolatileNumericType< ARGBType >, ARGBType >()

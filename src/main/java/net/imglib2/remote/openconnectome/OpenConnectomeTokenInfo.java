@@ -76,9 +76,9 @@ public class OpenConnectomeTokenInfo implements Serializable
 	
 	public String getBaseUrl()
 	{
-//		return "http://openconnecto.me/emca/" + project.dataset;
+		return "http://openconnecto.me/emca/" + project.dataset;
 //		return "http://rio.cs.jhu.edu/emca/" + project.dataset;
-		return "http://braingraph2.cs.jhu.edu/emca/" + project.dataset;
+//		return "http://braingraph2.cs.jhu.edu/emca/" + project.dataset;
 		
 	}
 	

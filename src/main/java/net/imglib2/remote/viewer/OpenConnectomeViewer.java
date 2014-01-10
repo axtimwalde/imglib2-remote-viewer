@@ -67,7 +67,8 @@ public class OpenConnectomeViewer
 			throws JsonSyntaxException, JsonIOException, IOException
 	{
 		final Gson gson = new Gson();
-		final URL url = new URL( "http://braingraph2.cs.jhu.edu/emca/public_tokens/" );
+//		final URL url = new URL( "http://braingraph2.cs.jhu.edu/emca/public_tokens/" );
+		final URL url = new URL( "http://openconnecto.me/emca/public_tokens/" );
 		final String[] tokens = gson.fromJson( new InputStreamReader( url.openStream() ), String[].class );
 		return tokens;
 	}
@@ -86,7 +87,8 @@ public class OpenConnectomeViewer
 			throws JsonSyntaxException, JsonIOException, IOException
 	{
 		final Gson gson = new Gson();
-		final URL url = new URL( "http://braingraph2.cs.jhu.edu/emca/" + token + "/info/" );
+//		final URL url = new URL( "http://braingraph2.cs.jhu.edu/emca/" + token + "/info/" );
+		final URL url = new URL( "http://openconnecto.me/emca/" + token + "/info/" );
 		return gson.fromJson( new InputStreamReader( url.openStream() ), OpenConnectomeTokenInfo.class );
 	}
 	

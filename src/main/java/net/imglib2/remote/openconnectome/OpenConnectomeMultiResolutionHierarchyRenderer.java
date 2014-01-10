@@ -159,7 +159,7 @@ public class OpenConnectomeMultiResolutionHierarchyRenderer< A extends AffineSet
 					levelTransform.set( levelScales[ level ][ d ], d, d );
 				levelTransform.set( -0.5 * ( levelScales[ level ][ 0 ] - 1 ), 0, 3 );
 				levelTransform.set( -0.5 * ( levelScales[ level ][ 1 ] - 1 ), 1, 3 );
-				levelTransform.set( -0.5 * ( levelScales[ level ][ 2 ] - 1 ), 2, 3 );
+				levelTransform.set( 0.5 * ( levelScales[ level ][ 2 ] - 1 ), 2, 3 );
 				
 				final B sourceCopy = transformType.createTransform();
 				sourceCopy.set( sourceTransform.getRowPackedCopy() );

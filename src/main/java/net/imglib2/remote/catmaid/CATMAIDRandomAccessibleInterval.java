@@ -36,7 +36,7 @@ import net.imglib2.Localizable;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.TypeIdentity;
-import net.imglib2.display.projector.Projector2D;
+import net.imglib2.display.projector.IterableIntervalProjector2D;
 import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.view.Views;
@@ -673,8 +673,8 @@ public class CATMAIDRandomAccessibleInterval extends AbstractInterval implements
 	final public void draw( final int width, final int height )
 	{
 		final ARGBScreenImage target = new ARGBScreenImage( width, height );
-		final Projector2D< ARGBType, ARGBType > projector =
-				new Projector2D< ARGBType, ARGBType >(
+		final IterableIntervalProjector2D< ARGBType, ARGBType > projector =
+				new IterableIntervalProjector2D< ARGBType, ARGBType >(
 						0,
 						1,
 						Views.offset( this, this.dimension( 0 ) / 2, this.dimension( 1 ) / 2, this.dimension( 2 ) / 2 ),
@@ -690,7 +690,7 @@ public class CATMAIDRandomAccessibleInterval extends AbstractInterval implements
 		projector.map();
 		System.out.println( " s = " + s + " took " + ( System.currentTimeMillis() - t ) + "ms" );
 			
-		imp.setImage( ( ( ARGBScreenImage )target ).image() );
+		imp.setImage( target.image() );
 	}
 	
 	final static public void main( final String... args )

@@ -34,7 +34,7 @@ import javax.imageio.ImageIO;
 
 import net.imglib2.Interval;
 import net.imglib2.converter.Converter;
-import net.imglib2.display.projector.Projector2D;
+import net.imglib2.display.projector.IterableIntervalProjector2D;
 import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.remote.Cache;
 import net.imglib2.type.numeric.ARGBType;
@@ -304,8 +304,8 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 	final public void draw( final int width, final int height )
 	{
 		final ARGBScreenImage target = new ARGBScreenImage( width, height );
-		final Projector2D< VolatileNumericType< ARGBType >, ARGBType > projector =
-				new Projector2D< VolatileNumericType<ARGBType>, ARGBType >(
+		final IterableIntervalProjector2D< VolatileNumericType< ARGBType >, ARGBType > projector =
+				new IterableIntervalProjector2D< VolatileNumericType<ARGBType>, ARGBType >(
 						0,
 						1,
 						Views.offset( this, this.dimension( 0 ) / 2, this.dimension( 1 ) / 2, this.dimension( 2 ) / 2 ),
@@ -331,7 +331,7 @@ public class VolatileCATMAIDRandomAccessibleInterval extends
 			projector.map();
 			System.out.println( "trial " + ( ++nTrials ) + ": s = " + s + " took " + ( System.currentTimeMillis() - t ) + "ms" );
 				
-			imp.setImage( ( ( ARGBScreenImage )target ).image() );
+			imp.setImage( target.image() );
 		}
 	}
 	

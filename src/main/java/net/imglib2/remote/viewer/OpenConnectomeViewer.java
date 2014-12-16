@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -271,8 +270,8 @@ public class OpenConnectomeViewer
 		
 		final JButton test = new JButton( "Button" );
 		panel.add( tokenList );
-		panel.add( Box.createHorizontalGlue() );
-		panel.add( test );
+		//panel.add( Box.createHorizontalGlue() );
+		//panel.add( test );
 		return panel;
 	}
 	

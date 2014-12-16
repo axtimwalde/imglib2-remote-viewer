@@ -40,7 +40,8 @@ public class CATMAIDViewer
 	final static protected double resZ = 11.2;
 	
 //	final static protected String baseUrl = "http://fly.mpi-cbg.de/map/fib/aligned/xy/";
-	final static protected String baseUrl = "file:/home/saalfeld/tmp/catmaid/export-test/fib/aligned/xy/";
+//	final static protected String baseUrl = "file:/home/saalfeld/tmp/catmaid/export-test/fib/aligned/xy/";
+	final static protected String baseUrl = "file:/home/saalfeld/mnt/saalfeldlab/catmaid/export-test/fib/aligned/xy/";
 	
 	final static protected int tileWidth = 256;
 	final static protected int tileHeight = 256;
